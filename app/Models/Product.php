@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Product extends Model
+{
+    use HasFactory;
+    protected $fillable = [
+        'name',
+        'img',
+        'price',
+        'description',
+    ];
+    public function category(){
+        return $this->belongsTo(Category::class);
+    }
+    public function producthasattribute(){
+        return $this->hasMany(ProductHasAttribute::class);
+    }
+    public function productvariant(){
+        return $this->hasMany(ProductVariant::class);
+    }
+}
