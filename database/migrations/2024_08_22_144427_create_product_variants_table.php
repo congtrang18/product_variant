@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\Attribute;
-use App\Models\AttributeItem;
 use App\Models\Product;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -17,12 +15,13 @@ return new class extends Migration
         Schema::create('product_variants', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Product::class)->constrained();
-            $table->foreignIdFor(Attribute::class)->constrained();
-            $table->foreignIdFor(AttributeItem::class)->constrained();
             $table->string('sku');
-            $table->double('price');
             $table->integer('quantity');
             $table->string('img');
+            $table->double('price');
+
+
+
             $table->timestamps();
         });
     }

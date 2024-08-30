@@ -14,11 +14,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('product_has_attributes', function (Blueprint $table) {
-            $table->id();
-            $table->foreignIdFor(Product::class)->constrained();
             $table->foreignIdFor(Attribute::class)->constrained();
-            $table->json('attribute_item_id')->nullable();
-            $table->timestamps();
+            $table->foreignIdFor(Product::class)->constrained();
+            $table->primary(['product_id', 'attribute_id']);
+            $table->json('attribute_item_ids');
         });
     }
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Attribute;
+use App\Models\Category;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,6 +16,7 @@ return new class extends Migration
         Schema::create('attribute_items', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Attribute::class)->constrained();
+          
             $table->string('value');
             $table->timestamps();
         });
