@@ -2,32 +2,48 @@
 @section('content')
     <h3 class="text-center">xem chi tiết</h3>
     <div class="row">
-        <h1>{{ $product->name }}</h1>
-        <p>{{ $product->description }}</p>
+        <table class="table table-hover">
+            <tr>
+                <td>product_name</td>
+                <td>description</td>
+                <td>variants</td>
+               
+            </tr>
+            <tr>
+                <td>{{ $product->name }}</td>
+                <td>{{ $product->description }}</td>
+                <td>
+                    <ul>
+                        @foreach ($product->productvariant as $variant)
+                        <li>Variant SKU: {{ $variant->sku }}</li>
+                        <li>Quantity: {{ $variant->quantity }}</li>
+                        <li>Price: {{ $variant->price }}</li>
 
-        <h2>Variants</h2>
-        @foreach ($product->productvariant as $variant)
-            <div>
-                <h3>Variant SKU: {{ $variant->sku }}</h3>
-                <p>Quantity: {{ $variant->quantity }}</p>
-                <p>Price: {{ $variant->price }}</p>
-                <img src="{{ $variant->img }}" alt="Variant Image">
+                        <li> <img src="{{ $variant->img }}" alt="Variant Image"></li>
+                        <h6>Attributes:</h6>
+                        <ul>
+                            @foreach ($variant->attribute as $attribute)
+                                <li>{{ $attribute->name }}:
+                                    @php
+                                        $attributeItemId = $attribute->pivot->attribute_item_id;
 
-                <h4>Attributes:</h4>
-                <ul>
-                    @foreach ($variant->attribute as $attribute)
-                        <li>{{ $attribute->name }}:
-                            @php
-                                $attributeItemId = $attribute->pivot->attribute_item_id;
-                                // Giả sử bạn có hàm getAttributeItemValue để lấy giá trị từ id
-                                $attributeItemValue = \App\Models\AttributeItem::getAttributeItemValue($attributeItemId);
-                            @endphp
-                            {{ $attributeItemValue }}
-                        </li>
+                                        $attributeItemValue = \App\Models\AttributeItem::getAttributeItemValue(
+                                            $attributeItemId,
+                                        );
+                                    @endphp
+                                    {{ $attributeItemValue }}
+                                </li>
+                            @endforeach
+                        </ul>
                     @endforeach
-                </ul>
-            </div>
-        @endforeach
+                    </ul>
+                   
+                </td>
+
+            </tr>
+        </table>
+
+
 
     </div>
 @endsection
