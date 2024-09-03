@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\AttributeItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
@@ -10,7 +11,6 @@ use Illuminate\Support\Facades\DB;
 
 class ProductVariantController extends Controller
 {
-    //
     public function productvariantcreate($id)
     {
         $product = Product::query()->findOrFail($id);
@@ -23,13 +23,17 @@ class ProductVariantController extends Controller
         }
         // dd($attribute);
      
-        return view('productVariant.create', compact('attribute', 'product'));
+        // return view('productVariant.create', compact('attribute', 'product'));
+        return response()->json([
+            'product'=>$product,
+            'attribute'=>$attribute
+        ]);
     }
     public function productvariantstore(Request $request)
     {
         // dd($request->all());
         try {
-            DB::transaction(function () use ($request) {
+          DB::transaction(function () use ($request) {
            
                 
                 foreach ($request->variant as $attribute_id => $attribute_item_id) {
@@ -65,10 +69,13 @@ class ProductVariantController extends Controller
                         }
                     }
                 }
+               
                 
                 
             });
-            return redirect()->route("product.index");
+            return response()->json([
+                'message'=>'thêm mới thành công',
+            ]);
         } catch (\Throwable $th) {
             return $th->getMessage();
         }

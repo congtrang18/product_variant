@@ -1,16 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\Models\Attribute;
+use App\Http\Controllers\Controller;
 use App\Models\AttributeItem;
-use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-
-// use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -19,40 +15,28 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
         $data = Product::with(["category", 'attribute', 'attribute.attributeItems'])->latest('id')->paginate(3);
-        $attributeitem=[
-
-        ];
+        $attributeitem = [];
         foreach ($data as  $item) {
             foreach ($item->attribute as $item) {
-                $attributeitem[$item->pivot->product_id][$item->pivot->attribute_id]=json_decode($item->pivot->attribute_item_ids);
+                $attributeitem[$item->pivot->product_id][$item->pivot->attribute_id] = json_decode($item->pivot->attribute_item_ids);
             }
         }
         // dd($attributeitem);
-        $dataAttributeItem=[];
+        $dataAttributeItem = [];
         foreach ($attributeitem as $product_id => $item) {
             foreach ($item as $attribute_id => $attribute_item_id) {
                 // dd($attribute_id);
-                $dataAttributeItem[$product_id][$attribute_id]=AttributeItem::query()->whereIn('id',$attribute_item_id)->get()->toArray();
+                $dataAttributeItem[$product_id][$attribute_id] = AttributeItem::query()->whereIn('id', $attribute_item_id)->get()->toArray();
             }
         }
         // dd($dataAttributeItem);
-
-        return view('product.index', compact('data','dataAttributeItem'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-        $category = Category::query()->pluck('name', 'id');
-        $attribute = Attribute::with(['attributeItems'])->get();
-        // $attribute=Attribute::query()->pluck('name','id');
-        // dd($attribute->toArray());   
-        return view('product.create', compact('category', 'attribute'));
+        return response()->json([
+            "message"=>'lấy dữ liệu thành công',
+            "data"=>$data,
+            "attributeitem"=>$attributeitem,
+            "dataAttributeItem"=>$dataAttributeItem
+        ]);
     }
 
     /**
@@ -60,10 +44,8 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
-        // dd($request->all());
         try {
-            DB::transaction(function () use ($request) {
+            $response=DB::transaction(function () use ($request) {
                 // dd($request->all());
                 $product = Product::query()->create([
                     'category_id' => $request->input('category_id'),
@@ -73,31 +55,27 @@ class ProductController extends Controller
                     'description' => $request->input('description'),
                 ]);
 
-
+                
                 foreach ($request->input('attribute_item') as $attributeName => $attributeValues) {
-                    
+
                     $attributeId = $request->input('attribute_id')[array_search(
                         $attributeName,
                         array_keys($request->input('attribute_item'))
                     )];
-                    // dd(array_search(
-                    //     $attributeName,
-                    //     array_keys($request->input('attribute_item'))
-                    // ));
-                    // dd($attributeId);
                     if ($attributeId) {
 
                         $product->attribute()->attach($attributeId, ['attribute_item_ids' => json_encode($attributeValues)]);
                     }
                 }
-
-
-
-                //                 
-
+                return [
+                    'message'=>"thêm mới thành công",
+                    'product'=>$product,
+                    
+                ];               
             });
-        } catch (\Exception $ex) {
-            return $ex->getMessage();
+            return response()->json($response);
+        } catch (\Throwable $th) {
+            return $th->getMessage();
         }
     }
 
@@ -105,21 +83,6 @@ class ProductController extends Controller
      * Display the specified resource.
      */
     public function show(string $id)
-    {
-        //
-        $product=Product::with(['productvariant','productvariant.attribute'])->findOrFail($id);
-        
-        // dd($product->toArray());
-
-       
-        
-        return view('product.show',compact('product'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
     {
         //
     }
